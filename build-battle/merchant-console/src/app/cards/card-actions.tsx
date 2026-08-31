@@ -14,9 +14,11 @@ export function CardActions({ cardId, status }: CardActionsProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [currentStatus, setCurrentStatus] = useState(status)
+  const [error, setError] = useState<string | null>(null)
 
   const handleStatusChange = async (newStatus: CardStatus) => {
     setIsLoading(true)
+    setError(null)
     try {
       const res = await fetch(`/api/cards/${cardId}`, {
         method: "PATCH",
@@ -27,7 +29,12 @@ export function CardActions({ cardId, status }: CardActionsProps) {
       if (res.ok) {
         setCurrentStatus(newStatus)
         router.refresh()
+      } else {
+        const data = await res.json()
+        setError(data.message || "Failed to update card status")
       }
+    } catch {
+      setError("Failed to update card status")
     } finally {
       setIsLoading(false)
     }
@@ -40,7 +47,11 @@ export function CardActions({ cardId, status }: CardActionsProps) {
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col gap-2">
+      {error && (
+        <span className="text-sm text-red-600 dark:text-red-400">{error}</span>
+      )}
+      <div className="flex gap-2">
       {currentStatus === "active" ? (
         <Button
           variant="secondary"
@@ -75,6 +86,7 @@ export function CardActions({ cardId, status }: CardActionsProps) {
       >
         Cancel
       </Button>
+      </div>
     </div>
   )
 }
