@@ -1,4 +1,5 @@
 import { Divider } from "@/components/Divider"
+import { CardStatusBadge } from "@/components/ui/cards/CardStatusBadge"
 import { merchantById } from "@/data/merchants"
 import { store } from "@/data/store"
 import { formatInZone } from "@/lib/dates"
@@ -33,7 +34,7 @@ export default async function CardDetail({
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-50">
           {card.nickname}
         </h1>
-        <StatusBadge status={card.status} />
+        <CardStatusBadge status={card.status} />
       </div>
       <p className="mt-1 font-mono text-sm text-gray-500">{card.id}</p>
 
@@ -106,19 +107,3 @@ function Field({
   )
 }
 
-function StatusBadge({ status }: { status: string }) {
-  const colors = {
-    active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-    frozen: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
-    cancelled: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
-  }
-  return (
-    <span
-      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
-        colors[status as keyof typeof colors] || colors.active
-      }`}
-    >
-      {status}
-    </span>
-  )
-}

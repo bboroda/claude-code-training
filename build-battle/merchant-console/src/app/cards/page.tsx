@@ -7,6 +7,7 @@ import {
   TableRoot,
   TableRow,
 } from "@/components/Table"
+import { CardStatusBadge } from "@/components/ui/cards/CardStatusBadge"
 import { merchantById, merchants } from "@/data/merchants"
 import { store } from "@/data/store"
 import { formatDate } from "@/lib/dates"
@@ -71,7 +72,7 @@ export default function CardsPage() {
                   <TableCell className="text-right font-medium tabular-nums text-gray-900 dark:text-gray-50">
                     {formatMoney(card.limit, card.currency)}
                   </TableCell>
-                  <TableCell className="capitalize">{card.status}</TableCell>
+                  <TableCell><CardStatusBadge status={card.status} /></TableCell>
                   <TableCell>{formatDate(card.createdAt)}</TableCell>
                 </TableRow>
               )
