@@ -1,4 +1,3 @@
-import { Button } from "@/components/Button"
 import {
   Table,
   TableBody,
@@ -8,13 +7,13 @@ import {
   TableRoot,
   TableRow,
 } from "@/components/Table"
-import { merchantById } from "@/data/merchants"
+import { merchantById, merchants } from "@/data/merchants"
 import { store } from "@/data/store"
 import { formatDate } from "@/lib/dates"
 import { formatMoney } from "@/lib/money"
 import { maskCardNumber } from "@/lib/cards"
-import { Plus } from "lucide-react"
 import Link from "next/link"
+import { IssueDrawer } from "./issue-drawer"
 
 export default function CardsPage() {
   const cards = store.cards
@@ -25,13 +24,7 @@ export default function CardsPage() {
         <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-50">
           Cards
         </h1>
-        <Button variant="primary" className="w-full gap-2 py-1.5 sm:w-fit">
-          <Plus
-            className="-ml-0.5 size-4 shrink-0"
-            aria-hidden="true"
-          />
-          Issue card
-        </Button>
+        <IssueDrawer merchants={merchants.map((m) => ({ id: m.id, name: m.name }))} />
       </div>
 
       <TableRoot className="border-t border-gray-200 dark:border-gray-800">
