@@ -1,0 +1,124 @@
+import { Divider } from "@/components/Divider"
+import { merchantById } from "@/data/merchants"
+import { store } from "@/data/store"
+import { formatInZone } from "@/lib/dates"
+import { formatMoney } from "@/lib/money"
+import { maskCardNumber } from "@/lib/cards"
+import Link from "next/link"
+import { notFound } from "next/navigation"
+
+export default async function CardDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const card = store.cards.find((c) => c.id === id)
+  if (!card) notFound()
+
+  const merchant = merchantById(card.merchantId)!
+  const spendPercentage = card.limit > 0 ? (card.spend / card.limit) * 100 : 0
+  const isHighSpend = spendPercentage > 80
+
+  return (
+    <div className="p-4 sm:p-6">
+      <Link
+        href="/cards"
+        className="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-gray-50"
+      >
+        ← All cards
+      </Link>
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-50">
+          {card.nickname}
+        </h1>
+        <StatusBadge status={card.status} />
+      </div>
+      <p className="mt-1 font-mono text-sm text-gray-500">{card.id}</p>
+
+      <Divider />
+
+      <dl className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Field label="Merchant">
+          {merchant.name}
+          <span className="ml-2 text-gray-500">{merchant.country}</span>
+        </Field>
+        <Field label="Card Number">
+          <span className="font-mono">{maskCardNumber(card.last4)}</span>
+        </Field>
+        <Field label="Currency">{card.currency}</Field>
+        <Field label="Created (UTC)">
+          <span className="font-mono text-sm">{card.createdAt}</span>
+        </Field>
+        <Field label={`Created (${merchant.timezone})`}>
+          {formatInZone(card.createdAt, merchant.timezone)}
+        </Field>
+        <Field label="Status">
+          <span className="capitalize">{card.status}</span>
+        </Field>
+      </dl>
+
+      <Divider />
+
+      <h2 className="text-sm font-semibold text-gray-900 dark:text-gray-50">
+        Spend vs Limit
+      </h2>
+      <div className="mt-4">
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-500">
+            {formatMoney(card.spend, card.currency)} spent
+          </span>
+          <span className="font-medium text-gray-900 dark:text-gray-50">
+            {formatMoney(card.limit, card.currency)} limit
+          </span>
+        </div>
+        <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-800">
+          <div
+            className={`h-full rounded-full transition-all ${
+              isHighSpend
+                ? "bg-amber-500"
+                : "bg-blue-500"
+            }`}
+            style={{ width: `${Math.min(spendPercentage, 100)}%` }}
+          />
+        </div>
+        <p className="mt-1 text-sm text-gray-500">
+          {spendPercentage.toFixed(1)}% of limit used
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  return (
+    <div>
+      <dt className="text-sm text-gray-500">{label}</dt>
+      <dd className="mt-1 text-sm text-gray-900 dark:text-gray-50">{children}</dd>
+    </div>
+  )
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const colors = {
+    active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+    frozen: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200",
+    cancelled: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
+  }
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+        colors[status as keyof typeof colors] || colors.active
+      }`}
+    >
+      {status}
+    </span>
+  )
+}
