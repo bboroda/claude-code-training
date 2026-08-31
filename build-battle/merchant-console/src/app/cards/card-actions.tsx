@@ -65,7 +65,11 @@ export function CardActions({ cardId, status }: CardActionsProps) {
       <Button
         variant="destructive"
         className="py-1 text-xs"
-        onClick={() => handleStatusChange("cancelled")}
+        onClick={() => {
+          if (window.confirm("Cancel this card? This action cannot be undone.")) {
+            handleStatusChange("cancelled")
+          }
+        }}
         isLoading={isLoading}
         disabled={isLoading}
       >

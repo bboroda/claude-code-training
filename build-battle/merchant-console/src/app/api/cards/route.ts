@@ -6,6 +6,10 @@ import { NextRequest, NextResponse } from "next/server"
 
 const VALID_CURRENCIES: Currency[] = ["USD", "EUR", "GBP"]
 const MAX_LIMIT = 5_000_000 // 5 million minor units
+const REQUEST_ID_TTL = 60_000 // 1 minute TTL for idempotency
+
+/** Track recent request IDs to prevent duplicate submissions */
+const recentRequestIds = new Map<string, number>()
 
 /**
  * GET /api/cards
@@ -28,11 +32,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ message: "Invalid JSON" }, { status: 400 })
   }
 
-  const { nickname, merchantId, limit, currency } = body as {
+  const { nickname, merchantId, limit, currency, requestId } = body as {
     nickname?: string
     merchantId?: string
     limit?: number
     currency?: string
+    requestId?: string
+  }
+
+  // Check for duplicate request (idempotency guard)
+  if (requestId) {
+    const now = Date.now()
+    // Clean up expired entries
+    for (const [id, timestamp] of recentRequestIds) {
+      if (now - timestamp > REQUEST_ID_TTL) {
+        recentRequestIds.delete(id)
+      }
+    }
+    // Check if this request ID was already processed
+    if (recentRequestIds.has(requestId)) {
+      return NextResponse.json(
+        { message: "Duplicate request" },
+        { status: 409 },
+      )
+    }
+    // Track this request ID
+    recentRequestIds.set(requestId, now)
   }
 
   // Validate nickname
@@ -76,6 +101,14 @@ export async function POST(request: NextRequest) {
   if (!currency || !VALID_CURRENCIES.includes(currency as Currency)) {
     return NextResponse.json(
       { message: "Currency must be USD, EUR, or GBP" },
+      { status: 400 },
+    )
+  }
+
+  // Currency must match merchant's currency
+  if (currency !== merchant.currency) {
+    return NextResponse.json(
+      { message: "Currency must match merchant's currency" },
       { status: 400 },
     )
   }

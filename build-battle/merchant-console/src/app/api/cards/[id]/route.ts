@@ -2,6 +2,13 @@ import { store } from "@/data/store"
 import { CardStatus } from "@/data/types"
 import { NextRequest, NextResponse } from "next/server"
 
+/** Valid status transitions for cards. Exported for testing. */
+export const validTransitions: Record<CardStatus, CardStatus[]> = {
+  active: ["frozen", "cancelled"],
+  frozen: ["active", "cancelled"],
+  cancelled: [], // Terminal state
+}
+
 /**
  * GET /api/cards/[id]
  * Returns a single card with last4 only (never the full number).
@@ -49,12 +56,6 @@ export async function PATCH(
   }
 
   // Validate status transition
-  const validTransitions: Record<CardStatus, CardStatus[]> = {
-    active: ["frozen", "cancelled"],
-    frozen: ["active", "cancelled"],
-    cancelled: [], // Terminal state
-  }
-
   if (!validTransitions[card.status].includes(status as CardStatus)) {
     return NextResponse.json(
       {

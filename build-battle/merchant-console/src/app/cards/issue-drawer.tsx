@@ -87,6 +87,7 @@ export function IssueDrawer({ merchants }: IssueDrawerProps) {
     }
 
     try {
+      const requestId = crypto.randomUUID()
       const res = await fetch("/api/cards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -95,6 +96,7 @@ export function IssueDrawer({ merchants }: IssueDrawerProps) {
           merchantId,
           limit,
           currency,
+          requestId,
         }),
       })
 

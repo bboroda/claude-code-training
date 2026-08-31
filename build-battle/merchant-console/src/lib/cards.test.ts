@@ -5,6 +5,7 @@ import {
   isValidLuhn,
   maskCardNumber,
 } from "./cards"
+import { validTransitions } from "@/app/api/cards/[id]/route"
 
 describe("generateCardNumber", () => {
   it("returns a 16-digit string", () => {
@@ -70,12 +71,6 @@ describe("extractLast4", () => {
 })
 
 describe("card status transitions", () => {
-  const validTransitions: Record<string, string[]> = {
-    active: ["frozen", "cancelled"],
-    frozen: ["active", "cancelled"],
-    cancelled: [],
-  }
-
   it("active can transition to frozen or cancelled", () => {
     expect(validTransitions.active).toContain("frozen")
     expect(validTransitions.active).toContain("cancelled")
