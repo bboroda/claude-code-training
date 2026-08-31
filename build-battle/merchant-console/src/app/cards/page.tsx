@@ -14,6 +14,7 @@ import { formatDate } from "@/lib/dates"
 import { formatMoney } from "@/lib/money"
 import { maskCardNumber } from "@/lib/cards"
 import Link from "next/link"
+import { CardActions } from "./card-actions"
 import { IssueDrawer } from "./issue-drawer"
 
 export default function CardsPage() {
@@ -38,12 +39,13 @@ export default function CardsPage() {
               <TableHeaderCell className="text-right">Spend Limit</TableHeaderCell>
               <TableHeaderCell>Status</TableHeaderCell>
               <TableHeaderCell>Created</TableHeaderCell>
+              <TableHeaderCell>Actions</TableHeaderCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {cards.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="py-16 text-center">
+                <TableCell colSpan={7} className="py-16 text-center">
                   <p className="font-medium text-gray-900 dark:text-gray-50">
                     No cards issued yet
                   </p>
@@ -74,6 +76,7 @@ export default function CardsPage() {
                   </TableCell>
                   <TableCell><CardStatusBadge status={card.status} /></TableCell>
                   <TableCell>{formatDate(card.createdAt)}</TableCell>
+                  <TableCell><CardActions cardId={card.id} status={card.status} /></TableCell>
                 </TableRow>
               )
             })}
